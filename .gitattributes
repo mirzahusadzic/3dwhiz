@@ -1,0 +1,2 @@
+# Keep the recovered files' original line endings; accept CRLF in diff checks.
+* whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol

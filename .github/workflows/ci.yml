@@ -1,0 +1,110 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  test:
+    name: ${{ matrix.name }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Ubuntu / GCC / UI
+            id: linux-gcc
+            os: ubuntu-24.04
+            cc: gcc
+            cxx: g++
+            sanitizers: 'OFF'
+            ui: 'ON'
+          - name: Ubuntu / Clang / ASan + UBSan
+            id: linux-clang-sanitize
+            os: ubuntu-24.04
+            cc: clang
+            cxx: clang++
+            sanitizers: 'ON'
+            ui: 'OFF'
+          - name: macOS / Apple Clang / ASan + UBSan
+            id: macos-clang-sanitize
+            os: macos-15
+            cc: clang
+            cxx: clang++
+            sanitizers: 'ON'
+            ui: 'OFF'
+    env:
+      CC: ${{ matrix.cc }}
+      CXX: ${{ matrix.cxx }}
+      UBSAN_OPTIONS: halt_on_error=1:print_stacktrace=1
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install Linux dependencies
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install --no-install-recommends -y \
+            build-essential clang cmake pkg-config libgtk-3-dev libepoxy-dev \
+            libgl1-mesa-dev libglu1-mesa-dev libgl1-mesa-dri libglx-mesa0 \
+            xvfb xauth dbus-x11 adwaita-icon-theme
+
+      - name: Install macOS dependencies
+        if: runner.os == 'macOS'
+        env:
+          HOMEBREW_NO_AUTO_UPDATE: '1'
+          HOMEBREW_NO_INSTALL_CLEANUP: '1'
+        run: brew install cmake gtk+3 pkgconf
+
+      - name: Configure
+        run: >-
+          cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug -DBUILD_TESTING=ON
+          -DWHIZ_SANITIZERS=${{ matrix.sanitizers }} -DWHIZ_UI_TESTS=${{ matrix.ui }}
+
+      - name: Build
+        run: cmake --build build --parallel 3
+
+      - name: Parser, geometry and math checks
+        run: >-
+          ctest --test-dir build --output-on-failure --no-tests=error
+          -L unit --output-junit unit-results.xml
+
+      - name: Editor interaction checks
+        if: matrix.ui == 'ON'
+        env:
+          GDK_BACKEND: x11
+          GDK_GL: legacy
+          LIBGL_ALWAYS_SOFTWARE: '1'
+          NO_AT_BRIDGE: '1'
+        run: |
+          dbus-run-session -- xvfb-run -a -s '-screen 0 1600x1000x24 +extension GLX' \
+            ctest --test-dir build --output-on-failure --no-tests=error \
+            -L ui --output-junit ui-results.xml
+
+      - name: Keep test reports and screenshots
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: checks-${{ matrix.id }}
+          path: |
+            build/*-results.xml
+            build/Testing/Temporary/*.log
+            build/editor*.png
+          if-no-files-found: ignore
+          retention-days: 14

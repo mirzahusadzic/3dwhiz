@@ -1,0 +1,32 @@
+ - embedd trackball view into widget.													- done
+ - make view matrix optimized to load only if view is changed.							- done
+ - implement adequate cursors depending on views mode (axis rotate, zoom, pan)			- done
+ - grid																					- done
+ - views gizmo																			- done	
+
+ - mesh support
+ - render modes
+ - transformations (scale, rotate)
+
+ - selections
+
+	a. selecting scene objects
+	b. selecting mesh entitis (vertices, edges, polygons (tris, quads))
+
+
+	a. selecting scene objects
+
+
+		1. point
+		2. marquee (rectangular area)
+		
+			1.	Selecting scene objects by single mouse point & click & release (without dragging) ivolves rendering
+				scene objects into selection buffer colorized (GL_FLAT without influence of light, fog and texture per pixel modifiers)
+				as unique color id. The special care should be considered when implementing 16bit color buffer (case 565 bits).  
+				The single pixel beneath the cursor is read from the back buffer, and used as object id to match from the scene objects.
+
+				Advantages: Frustrum culling is done within OpenGL which means that only visible objects are rendered into
+							selection buffer which is a plus for the speed.
+							Selects only one (front) object which fulfills into requirements.
+
+				Disadvantages: Requires enabled double buffering.

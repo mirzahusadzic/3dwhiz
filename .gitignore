@@ -1,0 +1,14 @@
+/build*/
+/.local/
+# Local resource directory.
+/res/
+*.swp
+*.swo
+*.dep
+*.o
+.DS_Store
+Thumbs.db
+# Local archives.
+*.tar.gz
+*.tgz
+*.zip

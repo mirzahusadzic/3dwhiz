@@ -1,0 +1,87 @@
+INPUT:
+
+	scale_factor
+	x_stari
+
+
+	x_stari_min
+	x_stari_max
+	...y
+	...z
+
+
+OUTPUT:
+
+	x_novi
+
+
+
+-------------------------------------------------------------
+
+
+range_x = x_stari_max - x_stari_min
+...y
+...z
+
+
+
+range_max = max( range_x, range_y, range_z )
+
+
+
+
+scale_factor_x = (range_x / range_max) * scale_factor
+...y
+...z
+
+
+
+
+for every vertex
+
+
+	x_novi = x_stari_min + x_lokacija  + (   scale_factor_x * (x_stari - x_stari_min)   )
+	...y
+	...z
+
+
+	gdje je
+
+
+	x_lokacija = (  range_x -  (range_x * scale_factor_x)   ) / 2
+	...y
+	...z
+
+
+
+
+
+
+
+ili pretumbano:
+
+
+
+
+	x_novi =  x_lokacija  +  x_stari_min * ( 1 - scale_factor_x ) +  (  scale_factor_x  *  x_stari  )
+                {----------------------------------------------------}
+                                      konstanta
+	...y
+	...z
+
+	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

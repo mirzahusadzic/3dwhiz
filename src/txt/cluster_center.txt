@@ -1,0 +1,44 @@
+Easy explanation of the sample median
+
+As an example, we will calculate the median of the following population of numbers: 1, 5, 2, 8, 7.
+Start by sorting the numbers: 1, 2, 5, 7, 8.
+In this case, 5 is the median, because when the numbers are sorted, it is the middle number.
+If there is an even amount of numbers, the median is the arithmetic mean of the two middle numbers.
+As an example of this scenario, we will calculate the median of the following population of numbers: 1, 5, 2, 10, 8, 7.
+Again, start by sorting the numbers: 1, 2, 5, 7, 8, 10.
+In this case, 6 is the median, because when the numbers are sorted, 5 and 7 are the two middle numbers. 
+The arithmetic mean of 5 and 7 is 6 (5 + 7 = 12, and 12/2 = 6).
+
+
+
+Approximating center of a cluster 'Cc' of the 3D objects.
+----------------------------------------------------------
+
+- The center of a cluster is defined as most dense point (with highest concentration of objects) in the 3D space. Depending 
+on the location, the most closer object is choosen as optimal seed from which n-tree is built.
+
+- Let 'On' is the count of total objects in the scene. The object 'O' is defined as 3D mesh with finite set of vertices (preferable low-poly meshes).
+
+1. For each 'O(i)' calculate center (3D point) of an bounding volume. AABB bounding volume is calculated by finding the objects minimal and 
+   maximal (pMIN and pMAX points) x, y and z values. The center 'Oc' is defined as (pMAX - pMIN) / 2.0.
+
+2. Sort objects center 'Oc' points, by treating each cardianl ax separately. This lead to constuction of separated X,Y and Z arrays.
+
+3. Find arrays medians mX, mY and mZ (median will exclude lonely-marginally objects).
+
+- The appoximated center of a cluster 'Cc' is constructed as 3D point {mX, mY, mZ}.
+
+
+Selecting the clusters optimal seed object depending on the 'Cc' location
+--------------------------------------------------------------------------
+
+
+- The clusters optimal seed object is considered to be a closest object to the center of a cluster 'Cc'.
+
+1. For each object 'O(i)' calculate the distance 'Od' defined as |Od| = Cc - Oc. This lead to the construction of an array of real numbers 
+   'D', which represents distance from the objects center to the center of a cluster.
+
+- The object with minimal distance 'Od' (perfectly 0.0) is choosen as optimal seed object, from wich the n-tree is built.
+
+
+

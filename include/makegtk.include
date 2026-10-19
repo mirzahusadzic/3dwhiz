@@ -1,0 +1,10 @@
+# no special C compiler flags (such as -fno-strict-aliasing for Python)
+# are needed for GTK
+GTK_CFLAGS =
+
+GTK_CPPFLAGS = $(shell pkg-config --cflags gtkglext-1.0)
+GTK_LIBS = $(shell pkg-config --libs gtkglext-1.0)
+
+override CFLAGS += $(GTK_CFLAGS)
+override CPPFLAGS += $(GTK_CPPFLAGS)
+override LIBS += $(GTK_LIBS)
